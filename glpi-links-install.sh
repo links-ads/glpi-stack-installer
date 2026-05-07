@@ -716,6 +716,13 @@ Apply_Patches() {
     echo "" >> "${PATCH_LOG}"
 
     Show 0 "Patch run complete — applied: ${applied}, skipped: ${skipped}."
+
+    # Clear Twig template cache so any patched .twig files take effect immediately
+    Show 2 "Clearing GLPI cache..."
+    ${sudo_cmd} docker exec "${GLPI_CONTAINER}" \
+        php bin/console cache:clear --allow-superuser &>/dev/null \
+        && Show 0 "Cache cleared." \
+        || Show 3 "Cache clear failed — you may need to run it manually."
 }
 
 ###############################################################################
