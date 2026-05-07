@@ -717,10 +717,10 @@ Apply_Patches() {
 
     Show 0 "Patch run complete — applied: ${applied}, skipped: ${skipped}."
 
-    # Clear Twig template cache so any patched .twig files take effect immediately
+    # Clear Twig template cache by deleting the cache directory
+    # (GLPI will recreate it with correct permissions on next request)
     Show 2 "Clearing GLPI cache..."
-    ${sudo_cmd} docker exec "${GLPI_CONTAINER}" \
-        php bin/console cache:clear --allow-superuser &>/dev/null \
+    ${sudo_cmd} docker exec "${GLPI_CONTAINER}" rm -rf /var/glpi/files/_cache \
         && Show 0 "Cache cleared." \
         || Show 3 "Cache clear failed — you may need to run it manually."
 }
