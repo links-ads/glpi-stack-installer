@@ -965,7 +965,6 @@ main() {
     Wait_For_DB
     Get_MySQL_Root_Password
     Create_Backup_User
-    Create_Catalog_User
 
     echo ""
     echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 6 — GLPI Marketplace${COLOUR_RESET}"
@@ -986,7 +985,12 @@ main() {
     Apply_Patches
 
     echo ""
-    echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 9 — Aliases & Dropbox Sync${COLOUR_RESET}"
+    echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 9 — Create Public Catalog User${COLOUR_RESET}"
+    echo ""
+    Create_Catalog_User
+
+    echo ""
+    echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 10 — Aliases & Dropbox Sync${COLOUR_RESET}"
     echo ""
     Setup_Aliases
     local sync_ok=0
@@ -994,7 +998,7 @@ main() {
 
     if [[ $sync_ok -eq 0 ]]; then
         echo ""
-        echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 10 — Restore Latest Backup${COLOUR_RESET}"
+        echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 11 — Restore Latest Backup${COLOUR_RESET}"
         echo ""
         Restore_Latest_Backup
     else
@@ -1002,7 +1006,7 @@ main() {
     fi
 
     echo ""
-    echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 11 — Backup Cronjob${COLOUR_RESET}"
+    echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 12 — Backup Cronjob${COLOUR_RESET}"
     echo ""
     Setup_Cronjob
 
