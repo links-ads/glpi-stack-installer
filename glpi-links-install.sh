@@ -386,6 +386,8 @@ readonly DB_CONTAINER="glpi-db-1"
 readonly GLPI_CONTAINER="glpi-glpi-1"
 readonly BACKUP_USER="glpi_backup"
 readonly BACKUP_PASSWORD="glpi_backup"
+readonly CATALOG_USER="glpi_catalog"
+readonly CATALOG_PASSWORD="glpi_catalog"
 
 # Generated root password is stored here after first retrieval
 MYSQL_ROOT_PASSWORD=""
@@ -491,6 +493,30 @@ Create_Backup_User() {
         echo -e "${GREEN_LINE}"
     else
         Show 1 "Failed to create backup user. Check MySQL logs: docker logs ${DB_CONTAINER}"
+    fi
+}
+
+Create_Catalog_User() {
+    Show 2 "Creating MySQL catalog read-only user 'glpi_catalog'..."
+
+    ${sudo_cmd} docker exec "${DB_CONTAINER}" mysql \
+        -u root \
+        -p"${MYSQL_ROOT_PASSWORD}" \
+        --connect-expired-password \
+        -e "
+            CREATE USER IF NOT EXISTS '${CATALOG_USER}'@'%' IDENTIFIED BY '${CATALOG_PASSWORD}';
+            GRANT SELECT ON glpi.glpi_softwares TO '${CATALOG_USER}'@'%';
+            GRANT SELECT ON glpi.glpi_softwarelicenses TO '${CATALOG_USER}'@'%';
+            GRANT SELECT ON glpi.glpi_items_softwarelicenses TO '${CATALOG_USER}'@'%';
+            GRANT SELECT ON glpi.glpi_softwarelicenses_users TO '${CATALOG_USER}'@'%';
+            GRANT SELECT ON glpi.glpi_softwarelicensetypes TO '${CATALOG_USER}'@'%';
+            FLUSH PRIVILEGES;
+        " 2>/dev/null
+
+    if [[ $? -eq 0 ]]; then
+        Show 0 "Catalog user 'glpi_catalog' created with read-only access to software/license tables."
+    else
+        Show 1 "Failed to create catalog user. Check DB connectivity and root password."
     fi
 }
 
@@ -939,6 +965,7 @@ main() {
     Wait_For_DB
     Get_MySQL_Root_Password
     Create_Backup_User
+    Create_Catalog_User
 
     echo ""
     echo -e "${GREEN_BULLET} ${aCOLOUR[1]}Step 6 — GLPI Marketplace${COLOUR_RESET}"
