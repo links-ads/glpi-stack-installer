@@ -772,8 +772,13 @@ Setup_Aliases() {
     local real_user real_home
     real_user="${SUDO_USER:-$USER}"
     real_home=$(getent passwd "${real_user}" | cut -d: -f6)
-    local aliases_source="${GLPI_DIR}/.glpi_aliases"
+
+    # Always use absolute path — relative paths break when sourcing from .bash_aliases
+    local abs_glpi_dir
+    abs_glpi_dir=$(realpath "${GLPI_DIR}")
+    local aliases_source="${abs_glpi_dir}/.glpi_aliases"
     local bash_aliases="${real_home}/.bash_aliases"
+
     local source_line=". ${aliases_source}"
     if [[ -f "${bash_aliases}" ]] && grep -qF "${source_line}" "${bash_aliases}"; then
         Show 0 ".bash_aliases already sources .glpi_aliases — skipping."
