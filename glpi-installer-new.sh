@@ -662,9 +662,9 @@ Install_Plugins() {
 # STEP 8 — APPLY PATCHES                                                      #
 ###############################################################################
 
-readonly PATCH_DIR_HOST="${GLPI_DIR}/patches"
 readonly PATCH_DIR_CONTAINER="/var/lib/glpi-patches"
-readonly PATCH_LOG="${PATCH_DIR_HOST}/apply-patches.log"
+PATCH_DIR_HOST=""
+PATCH_LOG=""
 
 Apply_Patches() {
     Show 2 "Looking for patches in ${PATCH_DIR_HOST}..."
@@ -866,6 +866,8 @@ main() {
         DOCKER_APPS_DIR="${HOME}/DockerApps"
     fi
     GLPI_DIR="${DOCKER_APPS_DIR}/glpi"
+    PATCH_DIR_HOST="${GLPI_DIR}/patches"
+    PATCH_LOG="${PATCH_DIR_HOST}/apply-patches.log"
 
     Show_Banner
     Show 2 "Installation directory: ${DOCKER_APPS_DIR}"
