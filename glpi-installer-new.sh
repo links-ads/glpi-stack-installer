@@ -448,20 +448,19 @@ Wait_For_GLPI() {
 
     local max_attempts=60  # up to 5 minutes
     local attempt=1
+
     while [[ $attempt -le $max_attempts ]]; do
-        local count
-        count=$(${sudo_cmd} docker exec "${DB_CONTAINER}" mysql \
+        local dbversion
+        dbversion=$(${sudo_cmd} docker exec "${DB_CONTAINER}" mysql \
             -u "${db_user}" \
             -p"${db_password}" \
             "${db_name}" \
             -sN \
-            -e "SELECT COUNT(*) FROM information_schema.tables
-                WHERE table_schema = '${db_name}'
-                AND table_name = 'glpi_configs';" \
+            -e "SELECT value FROM glpi_configs WHERE name = 'dbversion';" \
             2>/dev/null | tr -d '[:space:]')
 
-        if [[ "${count}" == "1" ]]; then
-            Show 0 "GLPI schema is initialized and ready."
+        if [[ -n "${dbversion}" && "${dbversion}" != "NULL" ]]; then
+            Show 0 "GLPI initialization complete (dbversion: ${dbversion})."
             return 0
         fi
 
