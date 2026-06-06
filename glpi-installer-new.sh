@@ -437,6 +437,42 @@ Wait_For_DB() {
     Show 1 "MySQL did not become ready in time. Check: sudo docker logs ${DB_CONTAINER}"
 }
 
+Wait_For_GLPI() {
+    Show 2 "Waiting for GLPI to complete first-run initialization..."
+
+    local env_file="${GLPI_DIR}/.env"
+    local db_user db_password db_name
+    db_user=$(grep -E '^GLPI_DB_USER=' "${env_file}" | cut -d'=' -f2 | tr -d '[:space:]')
+    db_password=$(grep -E '^GLPI_DB_PASSWORD=' "${env_file}" | cut -d'=' -f2 | tr -d '[:space:]')
+    db_name=$(grep -E '^GLPI_DB_NAME=' "${env_file}" | cut -d'=' -f2 | tr -d '[:space:]')
+
+    local max_attempts=60  # up to 5 minutes
+    local attempt=1
+    while [[ $attempt -le $max_attempts ]]; do
+        local count
+        count=$(${sudo_cmd} docker exec "${DB_CONTAINER}" mysql \
+            -u "${db_user}" \
+            -p"${db_password}" \
+            "${db_name}" \
+            -sN \
+            -e "SELECT COUNT(*) FROM information_schema.tables
+                WHERE table_schema = '${db_name}'
+                AND table_name = 'glpi_configs';" \
+            2>/dev/null | tr -d '[:space:]')
+
+        if [[ "${count}" == "1" ]]; then
+            Show 0 "GLPI schema is initialized and ready."
+            return 0
+        fi
+
+        Show 2 "GLPI not initialized yet, attempt ${attempt}/${max_attempts}..."
+        sleep 5
+        attempt=$((attempt + 1))
+    done
+
+    Show 1 "GLPI did not complete initialization in time. Check: sudo docker logs ${GLPI_CONTAINER}"
+}
+
 Get_MySQL_Root_Password() {
     Show 2 "Retrieving generated MySQL root password from container logs..."
     local max_attempts=12
@@ -906,6 +942,7 @@ main() {
     echo ""
     Start_GLPI_Stack
     Wait_For_DB
+    Wait_For_GLPI
     Get_MySQL_Root_Password
     Create_Backup_User
 
