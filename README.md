@@ -18,7 +18,9 @@ Automated installer for GLPI on a fresh Ubuntu/Debian machine. Handles everythin
 ## Usage
 
 ```bash
-curl -fsSL https://links-ads.github.io/glpi-stack-installer/glpi-links-install.sh | bash
+curl -fsSL https://links-ads.github.io/glpi-stack-installer/glpi-links-install.sh | bash -s -- [OPTIONS]
+e.g.
+curl -fsSL https://links-ads.github.io/glpi-stack-installer/glpi-links-install.sh | bash -s -- -d . -k ~/.ssh/glpi_ed25519
 ```
 
 The script is safe to re-run — every step checks whether it has already been completed and skips it if so.
